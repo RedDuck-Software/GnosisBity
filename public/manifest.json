@@ -1,0 +1,9 @@
+{
+  "name": "CreateVestingSchedule",
+  "short_name": "CreateVestingSchedule",
+  "description": "Set up vesting schedules",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

@@ -1,18 +1,41 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
+    <h1>
+      Safe address:
+    </h1>
+    <p>
+      {{ safeInfo.safeAddress }}
+    </p>
   </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import SafeAppsSDK from '@gnosis.pm/safe-apps-sdk';
 
 export default {
   name: "App",
-  components: {
-    HelloWorld,
+
+  data() {
+    return {
+      appsSdk: {},
+      safeInfo: {},
+    }
   },
+
+  async mounted() {
+    await this.loadSdk()
+  },
+
+  methods: {
+    async loadSdk() {
+      const appsSdk = new SafeAppsSDK();
+      try {
+        this.safeInfo = await appsSdk.safe.getInfo();
+      } catch (e) {
+        console.log(e)
+      }
+    },
+  }
 };
 </script>
 
