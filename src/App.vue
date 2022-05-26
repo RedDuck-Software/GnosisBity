@@ -6,11 +6,25 @@
     <p>
       {{ safeInfo.safeAddress }}
     </p>
+    <p>
+      erf3CwQdPsiA6KrGbdbjhA
+    </p>
+    <div>
+      <input v-model="bityApiKey">
+      <button @click="connectBity">
+        auth
+      </button>
+    </div>
+    <button @click="createOrder">
+      Order
+    </button>
   </div>
 </template>
 
 <script>
 import SafeAppsSDK from '@gnosis.pm/safe-apps-sdk';
+import { BityApiClient } from "@bity/api";
+import { Order, Owner } from "@bity/api/models";
 
 export default {
   name: "App",
@@ -18,23 +32,49 @@ export default {
   data() {
     return {
       appsSdk: {},
+      bityApiKey: '',
+      bity: {},
+      bityClientId: '',
       safeInfo: {},
     }
   },
 
   async mounted() {
     await this.loadSdk()
+    await this.connectBity()
   },
 
   methods: {
     async loadSdk() {
-      const appsSdk = new SafeAppsSDK();
+      this.appsSdk = new SafeAppsSDK();
       try {
-        this.safeInfo = await appsSdk.safe.getInfo();
+        this.safeInfo = await this.appsSdk.safe.getInfo();
       } catch (e) {
         console.log(e)
       }
     },
+
+    async connectBity () {
+      this.bity = await new BityApiClient({
+        exchangeApiUrl: 'https://exchange.api.bity.com/v2',
+        clientId: this.bityApiKey,
+      });
+      console.log(this.bity)
+    },
+
+    async createOrder() {
+      const ibanNum = 'CH0400766000103138557'
+      const order = new Order()
+      const result = order.setInput('CHF', '1.00')
+          .do((input) => input
+              .setOwner(new Owner())
+              .setIban(ibanNum))
+          .setOutput('ETH')
+          .do((output) => output
+              .setCryptoAddress(this.safeInfo.safeAddress));
+      const preparedOrder = await result.generateObjectForOrderCreation();
+      this.bity.createOrder(preparedOrder)
+    }
   }
 };
 </script>
