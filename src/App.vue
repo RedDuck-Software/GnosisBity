@@ -49,11 +49,30 @@ export default {
       }
     },
 
+    authorize () {
+      this.bity.fetchAuthorizationCode()
+    },
+
     async connectBity() {
       this.bity = await new BityApiClient({
         exchangeApiUrl: 'https://exchange.api.bity.com',
         bookmarksApiUrl: this.bityApiKey,
+        oauthConfig: {
+          authorizationUrl: 'https://connect.bity.com/oauth2/auth',
+          tokenUrl: 'https://connect.bity.com/oauth2/token',
+          clientId: this.bityApiKey,
+          scopes: ['https://auth.bity.com/scopes/exchange.place', 'https://auth.bity.com/scopes/exchange.history'],
+          redirectUrl: 'https://nymtech.net/',
+          onAccessTokenExpiry: (refreshAccessToken) => {
+            return refreshAccessToken()
+          },
+          onInvalidGrant: (refreshAuthCodeOrRefreshToken) => {
+            console.log(refreshAuthCodeOrRefreshToken)
+          }
+        }
       });
+
+      this.authorize()
 
       this.isOrderSectionHidden = false;
     },
